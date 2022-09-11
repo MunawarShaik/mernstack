@@ -53,12 +53,37 @@ router.post("/register", async (req, res) => {
 
     if (userExist) {
       return res.status(422).json({ error: "email already exists" });
+    } else if (password !== cpassword) {
+      return res.status(422).json({ error: "password are not matching" });
+    } else {
+      const user = new User({ name, email, phone, work, password, cpassword });
+      await user.save();
+      res.status(201).json({ message: "user registered successfully" });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+/// login route
+router.post("/signin", async (req, res) => {
+  //   console.log(req.body);
+  //   res.json({ message: "awesome" });
+
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "please fill the details" });
     }
 
-    const user = new User({ name, email, phone, work, password, cpassword });
-
-    await user.save();
-    res.status(201).json({ message: "user registered successfully" });
+    const userLogin = await User.findOne({ email: email });
+    console.log(userLogin);
+    if (!userLogin) {
+      res.status(400).json({ error: "user error" });
+    } else {
+      res.json({ message: "user logged in succesfully" });
+    }
   } catch (error) {
     console.log(error);
   }
